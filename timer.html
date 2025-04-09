@@ -5,8 +5,9 @@
   <title>Persistent Countdown Timer</title>
   <style>
     body { background: #1c1c1c; color: white; font-family: sans-serif; text-align: center; padding-top: 50px; }
-    input { padding: 8px; font-size: 16px; }
-    button { padding: 8px 16px; font-size: 16px; background-color: green; color: white; border: none; cursor: pointer; }
+    input, button { padding: 8px; font-size: 16px; margin: 5px; }
+    button { background-color: green; color: white; border: none; cursor: pointer; }
+    .reset-button { background-color: red; }
     h1 { font-size: 48px; }
   </style>
 </head>
@@ -14,44 +15,53 @@
   <h1 id="timer">00:00:00</h1>
   <input type="number" id="minutes" placeholder="Add minutes">
   <button onclick="addTime()">Add Time</button>
+  <button class="reset-button" onclick="resetTimer()">Reset</button>
 
   <script>
     let interval;
-    
+
     function addTime() {
-      const inputMinutes = parseInt(document.getElementById("minutes").value);
-      if (!isNaN(inputMinutes)) {
+      const mins = parseInt(document.getElementById("minutes").value);
+      if (!isNaN(mins)) {
         const currentEndTime = parseInt(localStorage.getItem("endTime")) || Date.now();
-        const newEndTime = currentEndTime + (inputMinutes * 60 * 1000);
+        const newEndTime = currentEndTime > Date.now() ? currentEndTime + (mins * 60 * 1000) : Date.now() + (mins * 60 * 1000);
         localStorage.setItem("endTime", newEndTime);
         startTimer(newEndTime);
       }
+    }
+
+    function resetTimer() {
+      clearInterval(interval);
+      localStorage.removeItem("endTime");
+      document.getElementById("timer").textContent = "00:00:00";
     }
 
     function startTimer(endTime) {
       clearInterval(interval);
       interval = setInterval(() => {
         const now = Date.now();
-        const diff = endTime - now;
+        const remaining = endTime - now;
 
-        if (diff <= 0) {
+        if (remaining <= 0) {
           clearInterval(interval);
           document.getElementById("timer").textContent = "00:00:00";
           localStorage.removeItem("endTime");
-        } else {
-          const hrs = String(Math.floor(diff / 3600000)).padStart(2, '0');
-          const mins = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
-          const secs = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
-          document.getElementById("timer").textContent = `${hrs}:${mins}:${secs}`;
+          return;
         }
+
+        const hrs = String(Math.floor(remaining / 3600000)).padStart(2, '0');
+        const mins = String(Math.floor((remaining % 3600000) / 60000)).padStart(2, '0');
+        const secs = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
+        document.getElementById("timer").textContent = `${hrs}:${mins}:${secs}`;
       }, 1000);
     }
 
-    // Resume timer if there's a saved endTime
-    const savedEndTime = parseInt(localStorage.getItem("endTime"));
-    if (savedEndTime && savedEndTime > Date.now()) {
-      startTimer(savedEndTime);
-    }
+    window.onload = () => {
+      const savedEndTime = parseInt(localStorage.getItem("endTime"));
+      if (savedEndTime && savedEndTime > Date.now()) {
+        startTimer(savedEndTime);
+      }
+    };
   </script>
 </body>
 </html>
