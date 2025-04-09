@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #timer {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .time-input {
+            font-size: 20px;
+            padding: 5px;
+            margin-top: 10px;
+        }
+
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="timer">00:00:00</div>
+
+    <div>
+        <input type="number" id="addMinutes" class="time-input" placeholder="Add minutes" />
+        <button onclick="addTime()">Add Time</button>
+    </div>
+
+    <script>
+        let timerInterval;
+        let currentTime = 0; // Time in seconds
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(currentTime / 3600); // Convert seconds to hours
+            const minutes = Math.floor((currentTime % 3600) / 60); // Convert remaining seconds to minutes
+            const seconds = currentTime % 60; // Remaining seconds
+
+            // Display as h:m:s format
+            document.getElementById('timer').textContent = `${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+        }
+
+        function padZero(num) {
+            return num < 10 ? '0' + num : num;
+        }
+
+        function addTime() {
+            const addMinutes = document.getElementById('addMinutes').value;
+            const additionalTime = parseInt(addMinutes) * 60; // Convert minutes to seconds
+            if (!isNaN(additionalTime) && additionalTime > 0) {
+                currentTime += additionalTime;
+                updateTimerDisplay();
+                startTimer();
+            } else {
+                alert("Please enter a valid number of minutes.");
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval); // Clear any existing intervals
+            timerInterval = setInterval(function() {
+                if (currentTime > 0) {
+                    currentTime--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                }
+            }, 1000); // Decrease every second
+        }
+
+        // Initialize timer display
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
